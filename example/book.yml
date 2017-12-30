@@ -1,0 +1,7 @@
+notebooks:
+    -notebook_one.ipynb
+    -notebook_two.ipynb
+    
+index:
+    max_depth: 2
+    
