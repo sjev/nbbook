@@ -18,5 +18,24 @@ print(exampleDir)
 
 #@pytest.mark.skip
 def test_exampleDir():
+    """ check that example dir is present """
     
+    print( exampleDir.exists())
     assert_isfile(exampleDir / 'notebook_one.ipynb')
+
+def test_re():
+    
+    import re
+    
+    line = " [ref]: # (Nulla sit amet - chapter 2)\n" 
+
+    pattern = re.compile('.*\[ref\]:[\s#(]*(?P<category>[^-]+)-(?P<desc>[^)]+)')
+    m = pattern.match(line)
+
+    print(m)    
+    if m is not None:
+        print(m.groupdict())    
+
+if __name__=="__main__":
+    
+    test_re()
