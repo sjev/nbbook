@@ -41,7 +41,6 @@ def headerToLink(line, srcNotebook):
 
 class Reference():
     # parses "[ref]: # (A - b)" style referencs
-    
     _regex = re.compile('.*\[ref\]:[\s#(]*(?P<category>[^-]+)-(?P<desc>[^)]+)') 
                    
     def __init__(self,category, description):
@@ -62,14 +61,22 @@ class Reference():
 
 class Header():
     """ header parser """
-    p = re.compile('[^#]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n]+)')    
+    _regex = re.compile('[^#]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n]+)')    
 
-    def __init__(self,line):
+    def __init__(self,txt,level):
         
-        assert lineIsHeader(line), "Not a valid header string"
-        m = self.p.match(line)
-        self.level = len(m['hash'])
-        self.txt = m['txt']
+        self.level = level
+        self.txt = txt
+        
+    @classmethod
+    def parse(cls, line):
+        """ parse line, return None if not a header """
+        
+        m = cls._regex.match(line)
+        if m:
+            return cls(m['txt'].strip(),len(m['hash']))
+        else:
+            return None 
         
         
     def linkTo(self,dest, indent = 0):
@@ -112,6 +119,6 @@ class Notebook():
         for cell in cells:
             if cell['cell_type'] == 'markdown':
                 for line in cell['source'].splitlines():
-                    if lineIsHeader(line): 
-                        headers.append(Header(line)) 
+                    h = Header.parse(line)
+                    if h:  headers.append(h) 
         return headers

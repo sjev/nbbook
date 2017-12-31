@@ -44,12 +44,10 @@ def test_Reference():
 
 def test_Header():
     
-    with pytest.raises(AssertionError):
-        book.Header(" Just some text")
-    
+   
     
     line = " ## Heading ABC"
-    h = book.Header(line)
+    h = book.Header.parse(line)
     
     
     assert h.level == 2
