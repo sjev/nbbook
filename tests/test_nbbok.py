@@ -21,7 +21,10 @@ def test_exampleDir():
     """ check that example dir is present """
     
     print( exampleDir.exists())
-    assert_isfile(exampleDir / 'notebook_one.ipynb')
+    testNb = exampleDir / 'notebook_one.ipynb'
+    assert_isfile(testNb)
+    return testNb
+    
 
 def test_re():
     
@@ -55,6 +58,14 @@ def test_Header():
     
     link = h.linkTo('test.ipynb', indent=2)
     assert link == '  * [Heading ABC](test.ipynb#Heading ABC)'
+    
+    
+def test_Notebook():
+    
+    nbFile = test_exampleDir() # get example filename
+    n = book.Notebook(nbFile)
+    
+    
 
 if __name__=="__main__":
     

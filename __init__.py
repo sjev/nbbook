@@ -1,1 +1,1 @@
-from .lib.core import *
+from .nbbook.core import *
