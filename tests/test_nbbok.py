@@ -26,18 +26,20 @@ def test_exampleDir():
     return testNb
     
 
-def test_re():
+def test_Reference():
     
-    import re
+    line = " No reference here ..."
+    r = book.Reference.parse(line)
+    assert r is None
+    
     
     line = " [ref]: # (Nulla sit amet - chapter 2)   extra characters\n" 
 
-    pattern = re.compile('.*\[ref\]:[\s#(]*(?P<category>[^-]+)-(?P<desc>[^)]+)')
-    m = pattern.match(line)
+    r = book.Reference.parse(line)
 
 
-    assert m['category'].strip() == 'Nulla sit amet'
-    assert m['desc'].strip() == 'chapter 2'
+    assert r.category == 'Nulla sit amet'
+    assert r.description == 'chapter 2'
 
 
 def test_Header():
@@ -65,7 +67,11 @@ def test_Notebook():
     nbFile = test_exampleDir() # get example filename
     n = book.Notebook(nbFile)
     
-    print(n.headers)
+    print('Headers:', n.headers)
+    
+    headers = [h.txt for h in n.headers]
+    assert 'Part One' in headers
+    assert 'Chapter Two' in headers
 
 if __name__=="__main__":
     

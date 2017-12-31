@@ -39,6 +39,27 @@ def headerToLink(line, srcNotebook):
     
     return link, header, level
 
+class Reference():
+    # parses "[ref]: # (A - b)" style referencs
+    
+    _regex = re.compile('.*\[ref\]:[\s#(]*(?P<category>[^-]+)-(?P<desc>[^)]+)') 
+                   
+    def __init__(self,category, description):
+        
+        self.category = category
+        self.description = description
+
+    @classmethod
+    def parse(cls, line):
+        
+        m = cls._regex.match(line)
+        if m:
+            return cls(m['category'].strip(),m['desc'].strip())
+        else:
+            return None
+            
+        
+
 class Header():
     """ header parser """
     p = re.compile('[^#]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n]+)')    
