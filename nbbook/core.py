@@ -68,7 +68,8 @@ class Header():
         else:
             return "[%s](%s#%s)" % (self.txt,dest,self.txt)    
         
-        
+    def __repr__(self):
+         return 'Header("%s")'% self.txt
 
 class Notebook():
     """ notebook parsing class """
@@ -80,5 +81,16 @@ class Notebook():
         
         # parse
         self.data = nbf.read(self.file.as_posix(),as_version=4)
+        self.headers = self._parse_headers()
+    
+    def _parse_headers(self):
+        """ list of headers """
         
-        
+        headers = []
+        cells = self.data['cells']
+        for cell in cells:
+            if cell['cell_type'] == 'markdown':
+                for line in cell['source'].splitlines():
+                    if lineIsHeader(line): 
+                        headers.append(Header(line)) 
+        return headers

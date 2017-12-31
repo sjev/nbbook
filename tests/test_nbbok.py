@@ -65,7 +65,7 @@ def test_Notebook():
     nbFile = test_exampleDir() # get example filename
     n = book.Notebook(nbFile)
     
-    
+    print(n.headers)
 
 if __name__=="__main__":
     
