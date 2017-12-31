@@ -3,17 +3,29 @@
 import nbformat as nbf
 import re
 from pathlib import Path
+import yaml
 
-#foo
-def lineIsHeader(line):      
+#%% -------------Action functions-------------------
+
+def buildIndex(path, config='book.yml'):
+    """
+    Build index notebook. 
     
-    if not line.strip(): # empty line
-        return False 
-    
-    if line.strip()[0] != "#": # not a header
-        return False
-    
-    return True
+    Parameters
+    ------------
+    path : str
+        location of the notebooks folder
+    config : str
+        configuration yaml file.
+    """
+    path = Path(path)
+    cfg = yaml.load((path/config).open(mode='r'))
+    print(cfg)
+
+    notebooks = [Notebook(path/nb) for nb in cfg['notebooks'] ]    
+    print(notebooks)
+
+#%% --------------Worker classes--------------------
 
 def headerToLink(line, srcNotebook):
     """ 
@@ -108,17 +120,18 @@ class Notebook():
         self.file = Path(fName)
         
         # parse
-        self.data = nbf.read(self.file.as_posix(),as_version=4)
-        self.headers = self._parse_headers()
+        self._data = nbf.read(self.file.as_posix(),as_version=4)
     
-    def _parse_headers(self):
+    @property
+    def headers(self):
         """ list of headers """
         
         headers = []
-        cells = self.data['cells']
+        cells = self._data['cells']
         for cell in cells:
             if cell['cell_type'] == 'markdown':
                 for line in cell['source'].splitlines():
                     h = Header.parse(line)
                     if h:  headers.append(h) 
         return headers
+    

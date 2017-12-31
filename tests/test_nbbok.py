@@ -16,6 +16,14 @@ exampleDir = Path(__file__).parents[1] / 'example'
 
 print(exampleDir)
 
+def test_yaml():
+    """ check that config file can be parsed correctly """
+    import yaml
+    cfg = yaml.load((exampleDir/'book.yml').open(mode='r'))
+
+    assert 'notebook_one.ipynb' in cfg['notebooks']
+    assert 'max_depth' in cfg['index']
+
 #@pytest.mark.skip
 def test_exampleDir():
     """ check that example dir is present """
@@ -65,11 +73,16 @@ def test_Notebook():
     nbFile = test_exampleDir() # get example filename
     n = book.Notebook(nbFile)
     
-    print('Headers:', n.headers)
-    
     headers = [h.txt for h in n.headers]
     assert 'Part One' in headers
     assert 'Chapter Two' in headers
+    
+@pytest.mark.skip   
+def test_buildIndex():
+
+    path = exampleDir.as_posix()    
+    
+    book.buildIndex(path)
 
 if __name__=="__main__":
     
