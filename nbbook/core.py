@@ -20,10 +20,23 @@ def buildIndex(path, config='book.yml'):
     """
     path = Path(path)
     cfg = yaml.load((path/config).open(mode='r'))
-    print(cfg)
 
     notebooks = [Notebook(path/nb) for nb in cfg['notebooks'] ]    
-    print(notebooks)
+
+    headers = []
+    for nb in notebooks:
+        for h in nb.headers:
+            headers.append(h.linkTo(nb.file.name,indent=2))
+            
+    md = '\n'.join(headers)
+    
+    
+    
+    # write notebook
+    nb = nbf.v4.new_notebook()
+    nb['cells'] = [nbf.v4.new_markdown_cell(md)]
+    dest = (path/cfg['index']['name']).as_posix()
+    nbf.write(nb,dest)
 
 #%% --------------Worker classes--------------------
 
@@ -73,7 +86,7 @@ class Reference():
 
 class Header():
     """ header parser """
-    _regex = re.compile('[^#]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n]+)')    
+    _regex = re.compile('[\s]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n]+)')    
 
     def __init__(self,txt,level):
         
@@ -103,10 +116,12 @@ class Header():
             amount of spaces to indent per level. Will also ad a * character
                 
         """
+        link = "[%s](%s#%s)" % (self.txt,dest,self.txt.replace(' ','-'))
+        
         if indent > 0:
-            return indent*(self.level-1)*" "+"* [%s](%s#%s)" % (self.txt,dest,self.txt)
+            return indent*(self.level-1)*" "+"* "+link
         else:
-            return "[%s](%s#%s)" % (self.txt,dest,self.txt)    
+            return link    
         
     def __repr__(self):
          return 'Header("%s")'% self.txt
