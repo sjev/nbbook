@@ -17,6 +17,10 @@ def buildIndex(path, config='book.yml'):
         location of the notebooks folder
     config : str
         configuration yaml file.
+        
+    Returns
+    --------
+    int : number of elements in index
     """
     path = Path(path)
     cfg = yaml.load((path/config).open(mode='r'))
@@ -26,7 +30,8 @@ def buildIndex(path, config='book.yml'):
     headers = []
     for nb in notebooks:
         for h in nb.headers:
-            headers.append(h.linkTo(nb.file.name,indent=2))
+            if h.level <= cfg['index']['max_depth']:
+                headers.append(h.linkTo(nb.file.name,indent=cfg['index']['indent']))
             
     md = '\n'.join(headers)
     
@@ -38,6 +43,7 @@ def buildIndex(path, config='book.yml'):
     dest = (path/cfg['index']['name']).as_posix()
     nbf.write(nb,dest)
 
+    return len(headers)
 #%% --------------Worker classes--------------------
 
 def headerToLink(line, srcNotebook):

@@ -3,5 +3,8 @@ notebooks:
     - notebook_two.ipynb
     
 index:
-    max_depth: 2
     name : _index.ipynb
+    indent: 2
+    max_depth: 2
+    
+    

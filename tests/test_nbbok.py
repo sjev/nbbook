@@ -90,7 +90,9 @@ def test_buildIndex():
  
     path = exampleDir.as_posix()    
     
-    book.buildIndex(path)
+    nrHeaders = book.buildIndex(path)
+    
+    assert nrHeaders == 9
     
     assert outFile.exists()
 
