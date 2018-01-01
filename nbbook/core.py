@@ -22,28 +22,12 @@ def buildIndex(path, config='book.yml'):
     --------
     int : number of elements in index
     """
-    path = Path(path)
-    cfg = yaml.load((path/config).open(mode='r'))
+    book = Book(Path(path)/config)
+    return book.buildIndex()
 
-    notebooks = [Notebook(path/nb) for nb in cfg['notebooks'] ]    
+       
 
-    headers = []
-    for nb in notebooks:
-        for h in nb.headers:
-            if h.level <= cfg['index']['max_depth']:
-                headers.append(h.linkTo(indent=cfg['index']['indent']))
-            
-    md = '\n'.join(headers)
     
-    
-    
-    # write notebook
-    nb = nbf.v4.new_notebook()
-    nb['cells'] = [nbf.v4.new_markdown_cell(md)]
-    dest = (path/cfg['index']['name']).as_posix()
-    nbf.write(nb,dest)
-
-    return len(headers)
 #%% --------------Worker classes--------------------
 
 class Reference():
@@ -146,5 +130,46 @@ class Notebook():
                         r.target = self.headers[-1] # link to last known header
                         self.references.append(r)
         
+
+class Book():
+    """ class for bundling & indexing notebooks """
+    def __init__(self,cfgFile):
+        
+        self._cfgFile = Path(cfgFile)
+        self.path = self._cfgFile.parent # root folder
+        self.config = yaml.load((self._cfgFile).open(mode='r'))
+        
+        # read notebooks
+        self.notebooks = [Notebook(self.path/nb) for nb in self.config['notebooks'] ] 
+        
+        # concat headers & references
+        self.headers = []
+        self.references = []
+        for nb in self.notebooks:
+            self.headers += nb.headers
+            self.references += nb.references
+            
+        
+        
+        
+    def buildIndex(self):
+        """ create index (TOC) notebook """
+        
+        cfg = self.config
+        
+        links = []
+        for h in self.headers:
+            if h.level <= cfg['index']['max_depth']:
+                links.append(h.linkTo(indent=cfg['index']['indent']))
+                
+        md = '\n'.join(links)
+        
+        
+        
+        # write notebook
+        nb = nbf.v4.new_notebook()
+        nb['cells'] = [nbf.v4.new_markdown_cell(md)]
+        dest = (self.path/cfg['index']['name']).as_posix()
+        nbf.write(nb,dest)
     
-   
+        return len(links)
