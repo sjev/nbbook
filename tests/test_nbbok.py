@@ -33,20 +33,6 @@ def test_exampleDir():
     assert_isfile(testNb)
     
 
-def test_Reference():
-    
-    line = " # No reference here ..."
-    r = book.Reference.parse(line)
-    assert r is None
-    
-    
-    line = " [ref]: # (Nulla sit amet - chapter 2)   extra characters\n" 
-
-    r = book.Reference.parse(line)
-
-
-    assert r.category == 'Nulla sit amet'
-    assert r.description == 'chapter 2'
 
 
 def test_Header():
@@ -68,9 +54,34 @@ def test_Header():
     link = h.linkTo()
     assert link == '[Heading ABC](test.ipynb#Heading-ABC)'
     
+    link = h.linkTo('Foo')
+    assert link == '[Foo](test.ipynb#Heading-ABC)'
+    
     link = h.linkTo(indent=2)
     assert link == '  * [Heading ABC](test.ipynb#Heading-ABC)'
     
+    
+    return h
+
+def test_Reference():
+    
+    line = " # No reference here ..."
+    r = book.Reference.parse(line)
+    assert r is None
+    
+    
+    line = " [ref]: # (Nulla sit amet - chapter 2)   extra characters\n" 
+    r = book.Reference.parse(line)
+
+    assert r.category == 'Nulla sit amet'
+    assert r.description == 'chapter 2'
+
+    h = test_Header()
+    r.target = h
+    
+    link = r.linkTo()
+    assert link == '[Heading ABC](test.ipynb#Heading-ABC)'
+
     
 def test_Notebook():
     
@@ -89,7 +100,7 @@ def test_Notebook():
 
     
     
-#@pytest.mark.skip   
+@pytest.mark.skip   
 def test_buildIndex():
 
     outFile = exampleDir / '_index.ipynb'
@@ -111,6 +122,8 @@ def test_Book():
     
     assert len(b.headers) == 10
     assert len(b.references) == 4
+    
+    b.buildReference()
 
 if __name__=="__main__":
     

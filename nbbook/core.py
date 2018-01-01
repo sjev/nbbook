@@ -36,10 +36,10 @@ class Reference():
                    
     def __init__(self,category, description, target,parent=None):
         
-        self.parent = parent
-        self.category = category
+        self.parent = parent # parent notebook or path
+        self.category = category 
         self.description = description
-        self.target = target
+        self.target = target # target header
 
     @classmethod
     def parse(cls, line):
@@ -49,7 +49,9 @@ class Reference():
             return cls(m['category'].strip(),m['desc'].strip(),None)
         else:
             return None
-            
+
+    def linkTo(self):
+        return self.target.linkTo()
         
 
 class Header():
@@ -73,14 +75,14 @@ class Header():
             return None 
         
         
-    def linkTo(self, indent = 0):
+    def linkTo(self,txt=None, indent = 0):
         """ 
         markdown link to parent notebook 
         
         Parameters
         -------------
-        dest :str
-            path to a notebook
+        txt :str
+            text to display in link. If None is provided, header text will be used
         indent : int 
             amount of spaces to indent per level. Will also ad a * character
                 
@@ -90,8 +92,10 @@ class Header():
             target = self.parent.file.name
         elif  isinstance(self.parent, str):
             target = self.parent
+          
+        linkTxt = self.txt if txt is None else txt
             
-        link = "[%s](%s#%s)" % (self.txt,target,self.txt.replace(' ','-'))
+        link = "[%s](%s#%s)" % (linkTxt,target,self.txt.replace(' ','-'))
         
         if indent > 0:
             return indent*(self.level-1)*" "+"* "+link
@@ -166,8 +170,6 @@ class Book():
                 
         md = '\n'.join(links)
         
-        
-        
         # write notebook
         nb = nbf.v4.new_notebook()
         nb['cells'] = [nbf.v4.new_markdown_cell(md)]
@@ -177,4 +179,11 @@ class Book():
         return lines
     
     
-    
+    def buildReference(self):
+        
+        index = {}
+        for ref in self.references:
+            if ref.category not in index:
+                index[ref.category] = []
+            index[ref.category].append(ref)
+            
