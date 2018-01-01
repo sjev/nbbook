@@ -5,7 +5,7 @@ Created on Sat Dec 30 18:17:45 2017
 
 @author: jev
 """
-import pytest
+#import pytest
 from pathlib import Path
 from testpath import assert_isfile
 
@@ -80,7 +80,7 @@ def test_Reference():
     r.target = h
     
     link = r.linkTo()
-    assert link == '[Heading ABC](test.ipynb#Heading-ABC)'
+    assert link == '[chapter 2](test.ipynb#Heading-ABC)'
 
     
 def test_Notebook():
@@ -98,24 +98,6 @@ def test_Notebook():
     assert 'Chapter Two' in headers
     
 
-    
-    
-@pytest.mark.skip   
-def test_buildIndex():
-
-    outFile = exampleDir / '_index.ipynb'
-    if outFile.exists(): outFile.unlink()
- 
-    path = exampleDir.as_posix()    
-    
-    lines = book.buildIndex(path)
-    print('\n-------index---------')
-    print('\n'.join(lines))
-    
-    assert len(lines) == 9
-    
-    assert outFile.exists()
-    
 def test_Book():
     
     b = book.Book(exampleDir / 'book.yml')
@@ -123,7 +105,22 @@ def test_Book():
     assert len(b.headers) == 10
     assert len(b.references) == 4
     
-    b.buildReference()
+    #--- index
+    outFile = exampleDir / '_index.ipynb'
+    if outFile.exists(): outFile.unlink()
+    lines = b.buildIndex()
+    
+    assert len(lines) == 9
+    assert outFile.exists()
+    
+    
+    #---reference
+    outFile = exampleDir / '_reference.ipynb'
+    if outFile.exists(): outFile.unlink()
+    
+    lines = b.buildReference()
+    assert lines[0] == '# Reference'
+    assert outFile.exists()
 
 if __name__=="__main__":
     

@@ -51,7 +51,7 @@ class Reference():
             return None
 
     def linkTo(self):
-        return self.target.linkTo()
+        return self.target.linkTo(txt=self.description)
         
 
 class Header():
@@ -180,10 +180,28 @@ class Book():
     
     
     def buildReference(self):
+        """ build reference notebook """
+        cfg = self.config
         
         index = {}
         for ref in self.references:
             if ref.category not in index:
                 index[ref.category] = []
             index[ref.category].append(ref)
-            
+        
+        lines = ['# Reference']
+        for category in sorted(index.keys()):
+            lines.append('\n## '+category)
+            for ref in index[category]:
+                lines.append(' * '+ref.linkTo())
+
+        md = '\n'.join(lines) 
+
+        # write notebook
+        nb = nbf.v4.new_notebook()
+        nb['cells'] = [nbf.v4.new_markdown_cell(md)]
+        dest = (self.path/cfg['reference']['name']).as_posix()
+        nbf.write(nb,dest)
+
+        return lines            
+        
