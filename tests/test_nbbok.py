@@ -86,7 +86,7 @@ def test_Notebook():
     assert 'Part One' in headers
     assert 'Chapter Two' in headers
     
-    
+
     
     
 #@pytest.mark.skip   
@@ -97,11 +97,20 @@ def test_buildIndex():
  
     path = exampleDir.as_posix()    
     
-    nrHeaders = book.buildIndex(path)
+    lines = book.buildIndex(path)
+    print('\n-------index---------')
+    print('\n'.join(lines))
     
-    assert nrHeaders == 9
+    assert len(lines) == 9
     
     assert outFile.exists()
+    
+def test_Book():
+    
+    b = book.Book(exampleDir / 'book.yml')
+    
+    assert len(b.headers) == 10
+    assert len(b.references) == 4
 
 if __name__=="__main__":
     

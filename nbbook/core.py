@@ -157,10 +157,12 @@ class Book():
         
         cfg = self.config
         
+        lines = []
         links = []
         for h in self.headers:
             if h.level <= cfg['index']['max_depth']:
                 links.append(h.linkTo(indent=cfg['index']['indent']))
+                lines.append('#'*h.level+h.txt)
                 
         md = '\n'.join(links)
         
@@ -172,4 +174,7 @@ class Book():
         dest = (self.path/cfg['index']['name']).as_posix()
         nbf.write(nb,dest)
     
-        return len(links)
+        return lines
+    
+    
+    
