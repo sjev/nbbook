@@ -59,15 +59,16 @@ def test_Header():
     # this is a heading
     line = " ## Heading ABC"
     h = book.Header.parse(line)
+    h.parent = 'test.ipynb'
     
     assert isinstance(h, book.Header)
     assert h.level == 2
     assert h.txt == 'Heading ABC'
     
-    link = h.linkTo('test.ipynb')
+    link = h.linkTo()
     assert link == '[Heading ABC](test.ipynb#Heading-ABC)'
     
-    link = h.linkTo('test.ipynb', indent=2)
+    link = h.linkTo(indent=2)
     assert link == '  * [Heading ABC](test.ipynb#Heading-ABC)'
     
     
@@ -76,11 +77,17 @@ def test_Notebook():
     nbFile =  exampleDir / 'notebook_one.ipynb'# get example filename
     n = book.Notebook(nbFile)
     
-    headers = [h.txt for h in n.headers]
+    link = n.headers[0].linkTo()
+    assert link == '[Part One](notebook_one.ipynb#Part-One)'
     
+    
+    headers = [h.txt for h in n.headers]
     assert len(headers) == 5
     assert 'Part One' in headers
     assert 'Chapter Two' in headers
+    
+    
+    
     
 #@pytest.mark.skip   
 def test_buildIndex():

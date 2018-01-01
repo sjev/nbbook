@@ -31,7 +31,7 @@ def buildIndex(path, config='book.yml'):
     for nb in notebooks:
         for h in nb.headers:
             if h.level <= cfg['index']['max_depth']:
-                headers.append(h.linkTo(nb.file.name,indent=cfg['index']['indent']))
+                headers.append(h.linkTo(indent=cfg['index']['indent']))
             
     md = '\n'.join(headers)
     
@@ -46,45 +46,23 @@ def buildIndex(path, config='book.yml'):
     return len(headers)
 #%% --------------Worker classes--------------------
 
-def headerToLink(line, srcNotebook):
-    """ 
-    transform line to markdown link in a notebook 
-    returns 
-        link : markdown link to a notebook
-        header : indented header text
-        level : 
-    
-    """
-    
-    p = re.compile('[^#]*(?P<hash>[#]+)[\s]+(?P<header>[^\n]+)')
-    m = p.match(line)
-    
-    level = len(m['hash'])
-    header = m['header']
-            
-    dest = Path(srcNotebook)
-    
-    txt = line.strip('#').strip() # stripped text
-    link = 4*(level-1)*" "+"* [%s](%s#%s)" % (txt,dest.name,txt) #
-    #header = 3*(level-1)*" "+txt
-    
-    return link, header, level
-
 class Reference():
     # parses "[ref]: # (A - b)" style referencs
     _regex = re.compile('.*\[ref\]:[\s#(]*(?P<category>[^-]+)-(?P<desc>[^)]+)') 
                    
-    def __init__(self,category, description):
+    def __init__(self,category, description, target,parent=None):
         
+        self.parent = parent
         self.category = category
         self.description = description
+        self.target = target
 
     @classmethod
     def parse(cls, line):
         
         m = cls._regex.match(line)
         if m:
-            return cls(m['category'].strip(),m['desc'].strip())
+            return cls(m['category'].strip(),m['desc'].strip(),None)
         else:
             return None
             
@@ -94,8 +72,9 @@ class Header():
     """ header parser """
     _regex = re.compile('[\s]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n]+)')    
 
-    def __init__(self,txt,level):
+    def __init__(self,txt,level,parent=None):
         
+        self.parent = parent # parent notebook
         self.level = level
         self.txt = txt
         
@@ -110,9 +89,9 @@ class Header():
             return None 
         
         
-    def linkTo(self,dest, indent = 0):
+    def linkTo(self, indent = 0):
         """ 
-        markdown link to existing notebook 
+        markdown link to parent notebook 
         
         Parameters
         -------------
@@ -122,7 +101,13 @@ class Header():
             amount of spaces to indent per level. Will also ad a * character
                 
         """
-        link = "[%s](%s#%s)" % (self.txt,dest,self.txt.replace(' ','-'))
+        assert self.parent is not None, "Parent notebook is not set"
+        if isinstance(self.parent, Notebook):
+            target = self.parent.file.name
+        elif  isinstance(self.parent, str):
+            target = self.parent
+            
+        link = "[%s](%s#%s)" % (self.txt,target,self.txt.replace(' ','-'))
         
         if indent > 0:
             return indent*(self.level-1)*" "+"* "+link
@@ -143,16 +128,23 @@ class Notebook():
         # parse
         self._data = nbf.read(self.file.as_posix(),as_version=4)
     
-    @property
-    def headers(self):
-        """ list of headers """
+        self.headers = []
+        self.references = []
         
-        headers = []
         cells = self._data['cells']
         for cell in cells:
             if cell['cell_type'] == 'markdown':
                 for line in cell['source'].splitlines():
                     h = Header.parse(line)
-                    if h:  headers.append(h) 
-        return headers
+                    if h:
+                        h.parent = self
+                        self.headers.append(h) 
+                    
+                    r = Reference.parse(line)
+                    if r: 
+                        r.parent = self
+                        r.target = self.headers[-1] # link to last known header
+                        self.references.append(r)
+        
     
+   
