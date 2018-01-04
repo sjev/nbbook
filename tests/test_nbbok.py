@@ -11,6 +11,7 @@ from testpath import assert_isfile
 
 import nbbook as book
 
+EXAMPLE_REF = " [ref]: # (Nulla sit amet - chapter 2)   \n" 
 
 exampleDir = Path(__file__).parents[1] / 'example'
 
@@ -38,7 +39,7 @@ def test_exampleDir():
 def test_Header():
     
     # this is not a heading
-    line = " [ref]: # (Nulla sit amet - chapter 2)   \n" 
+    line = EXAMPLE_REF
     h = book.Header.parse(line)
     assert h is None
    
@@ -70,7 +71,7 @@ def test_Reference():
     assert r is None
     
     
-    line = " [ref]: # (Nulla sit amet - chapter 2)   extra characters\n" 
+    line = EXAMPLE_REF
     r = book.Reference.parse(line)
 
     assert r.category == 'Nulla sit amet'
