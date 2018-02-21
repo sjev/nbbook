@@ -146,6 +146,10 @@ class Book():
         # read notebooks
         self.notebooks = [Notebook(self.path/nb) for nb in self.config['notebooks'] ] 
         
+        # init output notebook
+        self.notebook = nbf.v4.new_notebook()
+        self.notebook['cells'] = []
+        
         # concat headers & references
         self.headers = []
         self.references = []
@@ -168,20 +172,14 @@ class Book():
                 links.append(h.linkTo(indent=cfg['index']['indent']))
                 lines.append('#'*h.level+h.txt)
                 
-        md = '\n'.join(links)
-        
-        # write notebook
-        nb = nbf.v4.new_notebook()
-        nb['cells'] = [nbf.v4.new_markdown_cell(md)]
-        dest = (self.path/cfg['index']['name']).as_posix()
-        nbf.write(nb,dest)
-    
-        return lines
+        md = '# Index\n' + '\n'.join(links)
+        self.notebook['cells'].append(nbf.v4.new_markdown_cell(md))
+        return md
     
     
     def buildReference(self):
         """ build reference notebook """
-        cfg = self.config
+        
         
         index = {}
         for ref in self.references:
@@ -197,11 +195,17 @@ class Book():
 
         md = '\n'.join(lines) 
 
-        # write notebook
-        nb = nbf.v4.new_notebook()
-        nb['cells'] = [nbf.v4.new_markdown_cell(md)]
-        dest = (self.path/cfg['reference']['name']).as_posix()
-        nbf.write(nb,dest)
+        self.notebook['cells'].append(nbf.v4.new_markdown_cell(md))
 
-        return lines            
+        return md           
+    
+    def write(self):
+        """ write notebook """
         
+        cfg = self.config
+        
+        # write notebook
+        
+        dest = (self.path/cfg['index']['name']).as_posix()
+        print('Writing ',dest)
+        nbf.write(self.notebook,dest)

@@ -109,17 +109,20 @@ def test_Book():
     #--- index
     outFile = exampleDir / '_index.ipynb'
     if outFile.exists(): outFile.unlink()
-    lines = b.buildIndex()
+    md = b.buildIndex()
     
-    assert len(lines) == 9
-    assert outFile.exists()
+    lines = md.splitlines()
+    assert len(lines) == 10
     
     
     #---reference
-    outFile = exampleDir / '_reference.ipynb'
-    if outFile.exists(): outFile.unlink()
+    md = b.buildReference()
+    b.write()
     
-    lines = b.buildReference()
+    
+    lines = md.splitlines()
+    
+    
     assert lines[0] == '# Reference'
     assert outFile.exists()
 
