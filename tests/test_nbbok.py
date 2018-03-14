@@ -44,7 +44,7 @@ def test_Header():
     assert h is None
    
     # this is a heading
-    line = " ## Heading ABC"
+    line = " ## Heading ABC##"
     h = book.Header.parse(line)
     h.parent = 'test.ipynb'
     

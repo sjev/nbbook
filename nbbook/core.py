@@ -56,7 +56,7 @@ class Reference():
 
 class Header():
     """ header parser """
-    _regex = re.compile('[\s]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n]+)')    
+    _regex = re.compile('[\s]*(?P<hash>[#]+)[\s]+(?P<txt>[^\n#]+)')    
 
     def __init__(self,txt,level,parent=None):
         
@@ -209,3 +209,4 @@ class Book():
         dest = (self.path/cfg['index']['name']).as_posix()
         print('Writing ',dest)
         nbf.write(self.notebook,dest)
+        return dest
