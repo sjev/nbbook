@@ -158,7 +158,17 @@ class Book():
             self.references += nb.references
             
         
+     
+    def plainIndex(self):
+        """ create plain index, without the links """
+        cfg = self.config
         
+        lines = []
+        for h in self.headers:
+            if h.level <= cfg['index']['max_depth']:
+                lines.append('    '*h.level+h.txt)
+        
+        return '\n'.join(lines)
         
     def buildIndex(self):
         """ create index (TOC) notebook """
